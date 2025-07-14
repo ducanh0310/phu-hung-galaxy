@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Category, Subcategory } from '../types';
 import { Icon } from './Icon';
 
@@ -7,14 +6,49 @@ interface SidebarProps {
   categories: Category[];
   selectedSubcategory: Subcategory | null;
   onSelectSubcategory: (subcategory: Subcategory | null) => void;
+  loading: boolean;
+  error: string | null;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ categories, selectedSubcategory, onSelectSubcategory }) => {
-  const [openCategory, setOpenCategory] = useState<string | null>(categories[0]?.id || null);
+export const Sidebar: React.FC<SidebarProps> = ({ categories, selectedSubcategory, onSelectSubcategory, loading, error }) => {
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!openCategory && categories.length > 0) {
+      setOpenCategory(categories[0].id);
+    }
+  }, [categories, openCategory]);
 
   const toggleCategory = (categoryId: string) => {
     setOpenCategory(prev => (prev === categoryId ? null : categoryId));
   };
+
+  if (loading) {
+    return (
+      <aside className="w-64 bg-white h-full p-4 flex-shrink-0 shadow-lg flex flex-col">
+        <div className="flex items-center gap-3 mb-8 px-2">
+          <Icon name="fa-solid fa-seedling" className="text-3xl text-green-600" />
+          <h1 className="text-2xl font-bold text-slate-800">Gourmet Grove</h1>
+        </div>
+        <div className="flex-1 space-y-4 animate-pulse">
+            <div className="h-12 bg-slate-200 rounded-lg"></div>
+            <div className="h-12 bg-slate-200 rounded-lg"></div>
+            <div className="h-12 bg-slate-200 rounded-lg"></div>
+            <div className="h-12 bg-slate-200 rounded-lg"></div>
+        </div>
+      </aside>
+    );
+  }
+
+  if (error) {
+    return (
+      <aside className="w-64 bg-white h-full p-4 flex-shrink-0 shadow-lg flex flex-col items-center justify-center text-center">
+        <Icon name="fa-solid fa-exclamation-triangle" className="text-4xl text-red-500 mb-4" />
+        <h3 className="font-semibold text-red-600">Lỗi tải danh mục</h3>
+        <p className="text-sm text-slate-500 mt-1">{error}</p>
+      </aside>
+    );
+  }
 
   return (
     <aside className="w-64 bg-white h-full p-4 flex-shrink-0 shadow-lg flex flex-col">
@@ -22,52 +56,43 @@ export const Sidebar: React.FC<SidebarProps> = ({ categories, selectedSubcategor
         <Icon name="fa-solid fa-seedling" className="text-3xl text-green-600" />
         <h1 className="text-2xl font-bold text-slate-800">Gourmet Grove</h1>
       </div>
-      <nav className="flex-1">
-        <ul>
-          <li
-              className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors duration-200 mb-4 ${
-                !selectedSubcategory ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-slate-100'
-              }`}
-              onClick={() => onSelectSubcategory(null)}
+      <nav className="flex-1 space-y-4 overflow-y-auto">
+        {categories.map(category => (
+          <div key={category.id}>
+            <button
+              className={`flex items-center w-full px-3 py-2 rounded-lg font-semibold text-left transition-colors ${openCategory === category.id ? 'bg-green-50 text-green-700' : 'hover:bg-slate-100'}`}
+              onClick={() => toggleCategory(category.id)}
             >
-              <Icon name="fa-solid fa-store" className="w-5 text-center" />
-              <span>Tất Cả Sản Phẩm</span>
-          </li>
-
-          {categories.map(category => (
-            <li key={category.id} className="mb-2">
-              <div
-                className="flex justify-between items-center p-3 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-slate-100"
-                onClick={() => toggleCategory(category.id)}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon name={category.icon} className="w-5 text-center text-green-600" />
-                  <span className="font-semibold text-slate-700">{category.name}</span>
-                </div>
-                <Icon
-                  name={`fa-solid fa-chevron-down transition-transform duration-300 ${openCategory === category.id ? 'rotate-180' : ''}`}
-                  className="text-xs text-slate-400"
-                />
-              </div>
-              <ul className={`overflow-hidden transition-all duration-300 ease-in-out ${openCategory === category.id ? 'max-h-96' : 'max-h-0'}`}>
+              <Icon name={category.icon} className="mr-3 text-xl" />
+              {category.name}
+              <span className="ml-auto">
+                <Icon name={openCategory === category.id ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'} />
+              </span>
+            </button>
+            {openCategory === category.id && (
+              <ul className="pl-8 mt-2 space-y-1">
                 {category.subcategories.map(sub => (
-                  <li
-                    key={sub.id}
-                    onClick={() => onSelectSubcategory(sub)}
-                    className={`pl-11 pr-3 py-2.5 text-slate-600 cursor-pointer rounded-lg mt-1 transition-colors duration-200 relative
-                      ${selectedSubcategory?.id === sub.id
-                        ? 'bg-green-100 text-green-700 font-medium'
-                        : 'hover:bg-slate-100 hover:text-slate-800'
-                      }`}
-                  >
-                    {selectedSubcategory?.id === sub.id && <div className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-1 bg-green-500 rounded-full"></div>}
-                    {sub.name}
+                  <li key={sub.id}>
+                    <button
+                      className={`w-full text-left px-2 py-1 rounded transition-colors ${selectedSubcategory?.id === sub.id ? 'bg-green-100 text-green-800 font-bold' : 'hover:bg-slate-100'}`}
+                      onClick={() => onSelectSubcategory(sub)}
+                    >
+                      {sub.name}
+                    </button>
                   </li>
                 ))}
+                <li>
+                  <button
+                    className={`w-full text-left px-2 py-1 rounded transition-colors ${selectedSubcategory === null ? 'bg-green-50 text-green-700 font-bold' : 'hover:bg-slate-100'}`}
+                    onClick={() => onSelectSubcategory(null)}
+                  >
+                    Tất cả
+                  </button>
+                </li>
               </ul>
-            </li>
-          ))}
-        </ul>
+            )}
+          </div>
+        ))}
       </nav>
       <div className="p-4 bg-slate-100 rounded-lg text-center mt-4">
         <p className="text-sm text-slate-600">© 2024 Gourmet Grove</p>

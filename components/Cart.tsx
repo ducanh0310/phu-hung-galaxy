@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { CartItem } from '../types';
 import { Icon } from './Icon';
@@ -8,13 +7,14 @@ interface CartProps {
   onClose: () => void;
   items: CartItem[];
   onUpdateQuantity: (productId: string, quantity: number) => void;
+  onRemove: (productId: string) => void;
 }
 
 const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 };
 
-const CartLineItem: React.FC<{ item: CartItem; onUpdateQuantity: (id: string, q: number) => void }> = ({ item, onUpdateQuantity }) => {
+const CartLineItem: React.FC<{ item: CartItem; onUpdateQuantity: (id: string, q: number) => void; onRemove: (id: string) => void }> = ({ item, onUpdateQuantity, onRemove }) => {
     return (
         <div className="flex items-center gap-4 py-4">
             <img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-lg object-cover" />
@@ -28,11 +28,18 @@ const CartLineItem: React.FC<{ item: CartItem; onUpdateQuantity: (id: string, q:
                 <button onClick={() => onUpdateQuantity(item.id, item.quantity + 1)} className="w-6 h-6 rounded-full hover:bg-slate-100 text-slate-500">+</button>
             </div>
              <p className="w-20 text-right font-semibold text-sm">{formatPrice(item.price * item.quantity)}</p>
+            <button 
+                onClick={() => onRemove(item.id)}
+                className="w-8 h-8 rounded-full hover:bg-red-100 text-red-500 hover:text-red-700 transition-colors flex items-center justify-center"
+                title="Xóa sản phẩm"
+            >
+                <Icon name="fa-solid fa-trash" className="text-sm" />
+            </button>
         </div>
     );
 }
 
-export const Cart: React.FC<CartProps> = ({ isOpen, onClose, items, onUpdateQuantity }) => {
+export const Cart: React.FC<CartProps> = ({ isOpen, onClose, items, onUpdateQuantity, onRemove }) => {
     const totalPrice = useMemo(() => {
         return items.reduce((total, item) => total + item.price * item.quantity, 0);
     }, [items]);
@@ -57,7 +64,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose, items, onUpdateQuan
                         </div>
                     ) : (
                         <div className="divide-y divide-slate-100">
-                            {items.map(item => <CartLineItem key={item.id} item={item} onUpdateQuantity={onUpdateQuantity} />)}
+                            {items.map(item => <CartLineItem key={item.id} item={item} onUpdateQuantity={onUpdateQuantity} onRemove={onRemove} />)}
                         </div>
                     )}
                 </div>

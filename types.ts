@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -6,12 +5,12 @@ export interface Product {
   imageUrl: string;
   subcategory: string;
   description: string;
+  quantity?: number;
 }
 
 export interface Subcategory {
   id: string;
   name: string;
-  parentCategory: string;
 }
 
 export interface Category {
