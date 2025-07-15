@@ -1,5 +1,4 @@
-
-import type { Category, Product } from './types.ts';
+import type { Category, Product } from './types.js';
 
 export const CATEGORIES: Category[] = [
   {
