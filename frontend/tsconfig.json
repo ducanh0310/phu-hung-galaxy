@@ -15,7 +15,6 @@
     "noEmit": true,
     "allowJs": true,
     "baseUrl": ".",
-  
 
     /* Linting */
     "noUnusedLocals": true,
@@ -23,8 +22,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*" :  ["./*"]
+      "@/*": ["./*"]
     }
   },
   "include": ["."]
-} 
+}

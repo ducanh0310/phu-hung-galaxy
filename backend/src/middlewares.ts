@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { AnyZodObject, ZodError } from 'zod';
 
 // A more specific type for our errors
 interface AppError extends Error {
@@ -7,10 +8,34 @@ interface AppError extends Error {
 }
 
 /**
+ * Middleware to validate request body, query, and params against a Zod schema.
+ */
+export const validate = (schema: AnyZodObject) => (req: Request, res: Response, next: NextFunction) => {
+  try {
+    schema.parse({
+      body: req.body,
+      query: req.query,
+      params: req.params,
+    });
+    return next();
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Validation failed',
+        errors: error.flatten().fieldErrors,
+      });
+    }
+    return next(error);
+  }
+};
+
+/**
  * Centralized error handler.
  * Catches errors from async routes and formats them into a JSON response.
  */
-export const errorHandler = (err: AppError, req: Request, res: Response, next: NextFunction) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const errorHandler = (err: AppError, req: Request, res: Response, _next: NextFunction) => {
   console.error(err.stack);
 
   let statusCode = err.statusCode || 500;
@@ -46,7 +71,7 @@ export const errorHandler = (err: AppError, req: Request, res: Response, next: N
 /**
  * Handles requests to routes that do not exist.
  */
-export const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
+export const notFoundHandler = (req: Request, res: Response) => {
   res.status(404).json({
     status: 'error',
     message: `The requested route '${req.originalUrl}' does not exist.`,

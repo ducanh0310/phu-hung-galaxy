@@ -1,4 +1,3 @@
-
 import React, { useRef, ReactNode, RefObject } from 'react';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 

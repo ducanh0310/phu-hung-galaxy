@@ -1,4 +1,3 @@
-
 import { useState, useEffect, RefObject } from 'react';
 
 interface IntersectionObserverOptions {
@@ -9,7 +8,7 @@ interface IntersectionObserverOptions {
 
 export const useIntersectionObserver = <T extends HTMLElement>(
   elementRef: RefObject<T>,
-  options: IntersectionObserverOptions
+  options: IntersectionObserverOptions,
 ): boolean => {
   const [isVisible, setIsVisible] = useState(false);
 

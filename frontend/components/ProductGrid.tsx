@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Product } from '../../shared/types';
 import { ProductCard } from './ProductCard';
@@ -12,11 +11,11 @@ interface ProductGridProps {
 export const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart }) => {
   if (products.length === 0) {
     return (
-        <AnimatedElement>
-            <div className="text-center py-20">
-                <p className="text-xl text-slate-500">Không tìm thấy sản phẩm nào.</p>
-            </div>
-        </AnimatedElement>
+      <AnimatedElement>
+        <div className="text-center py-20">
+          <p className="text-xl text-slate-500">Không tìm thấy sản phẩm nào.</p>
+        </div>
+      </AnimatedElement>
     );
   }
 

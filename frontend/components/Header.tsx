@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Icon } from './Icon';
 
@@ -32,7 +31,11 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, cartItemCount, sear
           )}
         </button>
         <div className="w-12 h-12 rounded-full bg-slate-200 overflow-hidden">
-             <img src="https://picsum.photos/seed/avatar/100/100" alt="User Avatar" className="w-full h-full object-cover" />
+          <img
+            src="https://picsum.photos/seed/avatar/100/100"
+            alt="User Avatar"
+            className="w-full h-full object-cover"
+          />
         </div>
       </div>
     </header>
