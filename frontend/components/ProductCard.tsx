@@ -1,6 +1,7 @@
 import React from 'react';
 import { Product } from '../../shared/types';
 import { Icon } from './Icon';
+import { Link } from 'react-router-dom';
 
 interface ProductCardProps {
   product: Product;
@@ -12,8 +13,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
+  const handleAddToCartClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddToCart(product);
+  };
+
   return (
-    <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col">
+    <Link
+      to={`/products/${product.id}`}
+      className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col"
+    >
       <div className="overflow-hidden relative">
         <img
           src={product.imageUrl}
@@ -30,14 +40,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
         <div className="flex justify-between items-center mt-auto">
           <p className="text-xl font-bold text-green-600">{formatPrice(product.price)}</p>
           <button
-            onClick={() => onAddToCart(product)}
-            className="bg-green-500 text-white rounded-full h-11 w-11 flex items-center justify-center group-hover:bg-green-600 transition-colors duration-300 transform group-hover:scale-110"
+            onClick={handleAddToCartClick}
+            className="bg-green-500 text-white rounded-full h-11 w-11 flex items-center justify-center group-hover:bg-green-600 transition-colors duration-300 transform group-hover:scale-110 z-10"
             aria-label={`Thêm ${product.name} vào giỏ hàng`}
           >
             <Icon name="fa-solid fa-plus" />
           </button>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
