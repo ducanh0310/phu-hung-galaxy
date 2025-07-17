@@ -23,8 +23,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.husky
-.prettierrc
+
 .prettierignore
-.eslintrc.cjs
 
