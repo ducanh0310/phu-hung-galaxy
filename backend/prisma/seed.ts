@@ -42,7 +42,7 @@ async function main() {
           price: product.price,
           imageUrl: product.imageUrl,
           description: product.description,
-          subcategoryId: product.subcategory,
+          subcategoryId: product.subcategoryId,
         },
       });
     }

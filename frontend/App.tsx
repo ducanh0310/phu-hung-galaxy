@@ -1,12 +1,10 @@
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { ProductGrid } from './components/ProductGrid';
 import { Cart } from './components/Cart';
-import { Product, CartItem, Subcategory, Category } from './types';
-
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+import { Product, CartItem, Subcategory, Category } from '../shared/types.ts';
 
 export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -20,7 +18,7 @@ export default function App() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/categories`);
+        const response = await fetch('/api/v1/categories');
         if (!response.ok) throw new Error('Network response was not ok');
         const data: Category[] = await response.json();
         setCategories(data);
@@ -43,7 +41,7 @@ export default function App() {
       }
       
       try {
-        const response = await fetch(`${API_BASE_URL}/products?${params.toString()}`);
+        const response = await fetch(`/api/v1/products?${params.toString()}`);
         if (!response.ok) throw new Error('Network response was not ok');
         const data: Product[] = await response.json();
         setProducts(data);

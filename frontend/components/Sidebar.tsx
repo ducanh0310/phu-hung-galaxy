@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Category, Subcategory } from '../types';
+import { Category, Subcategory } from '../../shared/types';
 import { Icon } from './Icon';
 
 interface SidebarProps {

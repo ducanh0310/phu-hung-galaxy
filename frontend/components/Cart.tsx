@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { CartItem } from '../types';
+import { CartItem } from '../../shared/types';
 import { Icon } from './Icon';
 
 interface CartProps {

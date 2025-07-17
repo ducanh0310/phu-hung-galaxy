@@ -3,14 +3,18 @@ export interface Product {
   name: string;
   price: number;
   imageUrl: string;
-  subcategory: string;
   description: string;
+  subcategoryId: string;
+  // Populated by Prisma includes
+  subcategory?: Subcategory;
 }
 
 export interface Subcategory {
   id: string;
   name: string;
-  parentCategory: string;
+  categoryId: string;
+  // Populated by Prisma includes
+  category?: Category;
 }
 
 export interface Category {
@@ -22,4 +26,4 @@ export interface Category {
 
 export interface CartItem extends Product {
   quantity: number;
-}
+} 

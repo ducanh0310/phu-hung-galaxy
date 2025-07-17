@@ -1,11 +1,15 @@
 import express, { Express, Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
-import cors from 'cors';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { errorHandler, notFoundHandler } from './middlewares.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // For env File
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const prisma = new PrismaClient();
 
@@ -13,9 +17,6 @@ const app: Express = express();
 const port = process.env.PORT || 8000;
 
 // Middleware
-app.use(cors({
-    origin: process.env.CORS_ORIGIN
-}));
 app.use(express.json()); // To parse JSON bodies
 
 // --- API Routes ---
@@ -39,7 +40,7 @@ apiRouter.get('/categories', async (req: Request, res: Response, next: NextFunct
 apiRouter.get('/products', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { subcategory, q } = req.query;
-    const where: Parameters<typeof prisma.product.findMany>[0]['where'] = {};
+    const where: NonNullable<Parameters<typeof prisma.product.findMany>[0]>['where'] = {};
 
     if (subcategory) {
       where.subcategoryId = subcategory as string;
@@ -96,6 +97,20 @@ apiRouter.get('/products/:id', async (req: Request, res: Response, next: NextFun
 });
 
 app.use('/api/v1', apiRouter);
+
+// --- Production Static Serving ---
+if (process.env.NODE_ENV === 'production') {
+  const frontendDist = path.join(__dirname, '../../frontend/dist');
+
+  // Serve static files from the React app
+  app.use(express.static(frontendDist));
+
+  // The "catchall" handler: for any request that doesn't match one above,
+  // send back React's index.html file.
+  app.get('*', (req: Request, res: Response) => {
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
 
 // --- Server Health Check ---
 app.get('/', (req: Request, res: Response) => {

@@ -1,5 +1,5 @@
 
-import React, { useRef, ReactNode } from 'react';
+import React, { useRef, ReactNode, RefObject } from 'react';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 
 interface AnimatedElementProps {
@@ -10,7 +10,7 @@ interface AnimatedElementProps {
 
 export const AnimatedElement: React.FC<AnimatedElementProps> = ({ children, className = '', delay = 'delay-0' }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const isVisible = useIntersectionObserver(ref, { threshold: 0.1 });
+  const isVisible = useIntersectionObserver(ref as RefObject<HTMLElement>, { threshold: 0.1 });
 
   return (
     <div
