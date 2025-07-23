@@ -1,7 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Product } from '../../../shared/types';
 import ProductForm from './ProductForm.tsx';
-import { Link } from 'react-router-dom';
+import { DataTable } from './DataTable.tsx';
+import { ColumnDef } from '@tanstack/react-table';
+import { Button } from '../ui/button.tsx';
+import { ArrowUpDown, MoreHorizontal } from 'lucide-react';
+import { Checkbox } from '../ui/checkbox.tsx';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu.tsx';
 
 // Helper to get JWT token
 const getToken = () => localStorage.getItem('jwt');
@@ -36,8 +47,96 @@ export default function ProductManagementPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormOpen, setFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  const handleDelete = async (productId: string) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      try {
+        await fetchWithAuth(`/api/v1/admin/products/${productId}`, { method: 'DELETE' });
+        fetchProducts();
+      } catch (err) {
+        if (err instanceof Error) alert(`Failed to delete: ${err.message}`);
+      }
+    }
+  };
+
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
+    setFormOpen(true);
+  };
+
+  const columns: ColumnDef<Product>[] = [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: 'imageUrl',
+      header: 'Image',
+      cell: ({ row }) => (
+        <img src={row.getValue('imageUrl')} alt="Product" className="w-16 h-16 object-cover rounded-md" />
+      ),
+    },
+    {
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+    },
+    { accessorKey: 'subcategory.name', header: 'Subcategory' },
+    {
+      accessorKey: 'price',
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Price
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div className="text-right font-medium">{formatPrice(row.getValue('price'))}</div>,
+    },
+    {
+      id: 'actions',
+      cell: ({ row }) => {
+        const product = row.original;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => handleEdit(product)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDelete(product.id)} className="text-red-600">
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
@@ -59,89 +158,39 @@ export default function ProductManagementPage() {
 
   const handleAddNew = () => {
     setEditingProduct(null);
-    setIsModalOpen(true);
-  };
-
-  const handleEdit = (product: Product) => {
-    setEditingProduct(product);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = async (productId: string) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        await fetchWithAuth(`/api/v1/admin/products/${productId}`, { method: 'DELETE' });
-        // Refresh product list on success
-        fetchProducts();
-      } catch (err) {
-        if (err instanceof Error) alert(`Failed to delete: ${err.message}`);
-      }
-    }
+    setFormOpen(true);
   };
 
   const handleSave = () => {
-    setIsModalOpen(false);
+    setFormOpen(false);
     fetchProducts(); // Refresh list after save
   };
 
-  if (isLoading) return <div className="p-8">Loading products...</div>;
-  if (error) return <div className="p-8 text-red-500">Error: {error}</div>;
-
   return (
-    <div className="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <div className="sm:flex sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Product Management</h1>
-            <p className="mt-1 text-sm text-slate-600">A list of all the products in your store.</p>
-          </div>
-          <div className="mt-4 sm:mt-0 sm:ml-16 flex-shrink-0">
-            <button type="button" onClick={handleAddNew} className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Add new product</button>
-          </div>
-        </div>
-        <div className="mt-8 flex flex-col">
-          <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                <table className="min-w-full divide-y divide-slate-300">
-                  <thead className="bg-slate-100">
-                    <tr>
-                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">Name</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Subcategory</th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Price</th>
-                      <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6"><span className="sr-only">Actions</span></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 bg-white">
-                    {products.map((product) => (
-                      <tr key={product.id}>
-                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">{product.name}</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{product.subcategory?.name || 'N/A'}</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-500">{formatPrice(product.price)}</td>
-                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                          <button onClick={() => handleEdit(product)} className="text-green-600 hover:text-green-900">Edit</button>
-                          <button onClick={() => handleDelete(product.id)} className="ml-4 text-red-600 hover:text-red-900">Delete</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="mt-8">
-          <Link to="/admin/dashboard" className="text-green-600 hover:underline">← Back to Dashboard</Link>
+    <>
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-semibold md:text-2xl">Products</h1>
+        <div className="ml-auto flex items-center gap-2">
+          <Button onClick={handleAddNew}>Add new product</Button>
         </div>
       </div>
-      {isModalOpen && (
-        <ProductForm 
-          productToEdit={editingProduct} 
-          onClose={() => setIsModalOpen(false)} 
-          onSave={handleSave} 
-          fetchWithAuth={fetchWithAuth} 
+      {isLoading && <p>Loading products...</p>}
+      {error && <p className="text-red-500">Error: {error}</p>}
+      {!isLoading && !error && (
+        <DataTable
+          columns={columns}
+          data={products}
+          filterColumnId="name"
+          filterPlaceholder="Filter by product name..."
         />
       )}
-    </div>
+      <ProductForm
+        isOpen={isFormOpen}
+        productToEdit={editingProduct}
+        onClose={() => setFormOpen(false)}
+        onSave={handleSave}
+        fetchWithAuth={fetchWithAuth}
+      />
+    </>
   );
-} 
+}

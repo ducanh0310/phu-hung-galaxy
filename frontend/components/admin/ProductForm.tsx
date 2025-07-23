@@ -1,14 +1,28 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { Product, Category } from '../../../shared/types';
+import { Button } from '../ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../ui/dialog';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
+import { Textarea } from '../ui/textarea.tsx';
 
 interface ProductFormProps {
+  isOpen: boolean;
   productToEdit: Product | null;
   onClose: () => void;
   onSave: () => void;
   fetchWithAuth: (url: string, options?: RequestInit) => Promise<Response>;
 }
 
-export default function ProductForm({ productToEdit, onClose, onSave, fetchWithAuth }: ProductFormProps) {
+export default function ProductForm({ isOpen, productToEdit, onClose, onSave, fetchWithAuth }: ProductFormProps) {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -21,14 +35,11 @@ export default function ProductForm({ productToEdit, onClose, onSave, fetchWithA
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch categories for the dropdown
     const fetchCategories = async () => {
       try {
-        // Public route, no auth needed
         const response = await fetch('/api/v1/categories');
         const data = await response.json();
         setCategories(data);
-        // If creating a new product, set default subcategory
         if (!productToEdit && data.length > 0 && data[0].subcategories.length > 0) {
           setFormData((prev) => ({ ...prev, subcategoryId: data[0].subcategories[0].id }));
         }
@@ -37,7 +48,7 @@ export default function ProductForm({ productToEdit, onClose, onSave, fetchWithA
       }
     };
     fetchCategories();
-  }, [productToEdit]);
+  }, []);
 
   useEffect(() => {
     if (productToEdit) {
@@ -65,8 +76,8 @@ export default function ProductForm({ productToEdit, onClose, onSave, fetchWithA
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: FormEvent) => {
+    e?.preventDefault();
     setIsSaving(true);
     setError(null);
 
@@ -105,49 +116,90 @@ export default function ProductForm({ productToEdit, onClose, onSave, fetchWithA
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-bold">{productToEdit ? 'Edit Product' : 'Add New Product'}</h2>
-        </div>
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-slate-700">Name</label>
-              <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} required className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-green-500 focus:ring-green-500" />
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[625px]">
+        <DialogHeader>
+          <DialogTitle>{productToEdit ? 'Edit Product' : 'Add New Product'}</DialogTitle>
+          <DialogDescription>
+            {productToEdit ? 'Make changes to your product here.' : 'Add a new product to your store.'} Click save when
+            you're done.
+          </DialogDescription>
+        </DialogHeader>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+        >
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input id="name" name="name" value={formData.name} onChange={handleChange} required className="col-span-3" />
             </div>
-            <div>
-              <label htmlFor="subcategoryId" className="block text-sm font-medium text-slate-700">Subcategory</label>
-              <select name="subcategoryId" id="subcategoryId" value={formData.subcategoryId} onChange={handleChange} required className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                {categories.map((cat) => (
-                  <optgroup label={cat.name} key={cat.id}>
-                    {cat.subcategories.map((sub) => (
-                      <option key={sub.id} value={sub.id}>{sub.name}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="subcategoryId" className="text-right">
+                Subcategory
+              </Label>
+              <Select
+                name="subcategoryId"
+                value={formData.subcategoryId}
+                onValueChange={(value) => setFormData((prev) => ({ ...prev, subcategoryId: value }))}
+                required
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select a subcategory" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectGroup key={cat.id}>
+                      <SelectLabel>{cat.name}</SelectLabel>
+                      {cat.subcategories.map((sub) => (
+                        <SelectItem key={sub.id} value={sub.id}>
+                          {sub.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div>
-              <label htmlFor="price" className="block text-sm font-medium text-slate-700">Price (VND)</label>
-              <input type="number" name="price" id="price" value={formData.price} onChange={handleChange} required min="0" step="any" className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-green-500 focus:ring-green-500" />
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="price" className="text-right">
+                Price (VND)
+              </Label>
+              <Input
+                id="price"
+                name="price"
+                type="number"
+                value={formData.price}
+                onChange={handleChange}
+                required
+                min="0"
+                className="col-span-3"
+              />
             </div>
-            <div>
-              <label htmlFor="imageUrl" className="block text-sm font-medium text-slate-700">Image URL</label>
-              <input type="url" name="imageUrl" id="imageUrl" value={formData.imageUrl} onChange={handleChange} required className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-green-500 focus:ring-green-500" />
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="imageUrl" className="text-right">
+                Image URL
+              </Label>
+              <Input id="imageUrl" name="imageUrl" type="url" value={formData.imageUrl} onChange={handleChange} required className="col-span-3" />
             </div>
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-slate-700">Description</label>
-              <textarea name="description" id="description" value={formData.description} onChange={handleChange} required rows={4} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-green-500 focus:ring-green-500"></textarea>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">
+                Description
+              </Label>
+              <Textarea id="description" name="description" value={formData.description} onChange={handleChange} required className="col-span-3" />
             </div>
             {error && <p className="text-sm text-red-600">{error}</p>}
           </div>
-          <div className="p-6 bg-slate-50 border-t flex justify-end space-x-3">
-            <button type="button" onClick={onClose} disabled={isSaving} className="px-4 py-2 bg-white border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">Cancel</button>
-            <button type="submit" disabled={isSaving} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-slate-400">{isSaving ? 'Saving...' : 'Save Product'}</button>
-          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>Cancel</Button>
+            <Button type="submit" disabled={isSaving}>{isSaving ? 'Saving...' : 'Save Product'}</Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
-} 
+}

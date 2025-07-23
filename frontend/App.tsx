@@ -7,6 +7,8 @@ import LoginPage from './components/admin/LoginPage';
 import CategoryManagementPage from './components/admin/CategoryManagementPage.tsx';
 import AdminDashboardPage from './components/admin/AdminDashboardPage';
 import ProductManagementPage from './components/admin/ProductManagementPage';
+import AdminLayout from './components/admin/AdminLayout.tsx';
+import AdminProtectedRoute from './components/admin/AdminProtectedRoute.tsx';
 
 type OutletContextType = {
   products: Product[];
@@ -35,10 +37,15 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="products/:id" element={<ProductDetail />} />
       </Route>
+
       <Route path="/admin/login" element={<LoginPage />} />
-      <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-      <Route path="/admin/products" element={<ProductManagementPage />} />
-      <Route path="/admin/categories" element={<CategoryManagementPage />} />
+      <Route element={<AdminProtectedRoute />}>
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+          <Route path="/admin/products" element={<ProductManagementPage />} />
+          <Route path="/admin/categories" element={<CategoryManagementPage />} />
+        </Route>
+      </Route>
     </Routes>
   );
 }
