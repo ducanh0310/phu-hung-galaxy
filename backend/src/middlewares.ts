@@ -2,9 +2,17 @@ import { Request, Response, NextFunction } from 'express';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { AnyZodObject, ZodError } from 'zod';
 
-// A more specific type for our errors
-interface AppError extends Error {
-  statusCode?: number;
+export class AppError extends Error {
+  statusCode: number;
+
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+  }
 }
 
 /**
@@ -35,13 +43,16 @@ export const validate = (schema: AnyZodObject) => (req: Request, res: Response, 
  * Catches errors from async routes and formats them into a JSON response.
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const errorHandler = (err: AppError, req: Request, res: Response, _next: NextFunction) => {
+export const errorHandler = (err: Error, req: Request, res: Response, _next: NextFunction) => {
   console.error(err.stack);
 
-  let statusCode = err.statusCode || 500;
-  let message = err.message || 'An unexpected error occurred.';
+  let statusCode = 500;
+  let message = 'An unexpected error occurred.';
 
-  if (err instanceof PrismaClientKnownRequestError) {
+  if (err instanceof AppError) {
+    statusCode = err.statusCode;
+    message = err.message;
+  } else if (err instanceof PrismaClientKnownRequestError) {
     switch (err.code) {
       case 'P2025':
         statusCode = 404;

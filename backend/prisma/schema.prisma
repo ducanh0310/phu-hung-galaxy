@@ -34,3 +34,9 @@ model Product {
   subcategory   Subcategory @relation(fields: [subcategoryId], references: [id])
   subcategoryId String
 }
+
+model Admin {
+  id           String @id @default(cuid())
+  username     String @unique
+  passwordHash String
+}

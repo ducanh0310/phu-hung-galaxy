@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -49,7 +49,29 @@ const getProductById = async (id: string) => {
   return product;
 };
 
+const createProduct = async (data: Prisma.ProductCreateInput) => {
+  return prisma.product.create({
+    data,
+  });
+};
+
+const updateProduct = async (id: string, data: Prisma.ProductUpdateInput) => {
+  return prisma.product.update({
+    where: { id },
+    data,
+  });
+};
+
+const deleteProduct = async (id: string) => {
+  return prisma.product.delete({
+    where: { id },
+  });
+};
+
 export const productService = {
   getProducts,
   getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
 };

@@ -1,5 +1,6 @@
 import { PrismaClient, Prisma } from '@prisma/client';
 import { CATEGORIES, PRODUCTS } from '../src/constants.js';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -12,6 +13,7 @@ async function main() {
     await tx.product.deleteMany();
     await tx.subcategory.deleteMany();
     await tx.category.deleteMany();
+    await tx.admin.deleteMany();
 
     console.log('Old data cleared.');
 
@@ -47,6 +49,18 @@ async function main() {
       });
     }
     console.log(`Seeded ${PRODUCTS.length} products.`);
+
+    // Seed Admin User
+    const adminUsername = 'admin';
+    const password = 'password123'; // Use a more secure password in a real scenario
+    const passwordHash = await bcrypt.hash(password, 10);
+    await tx.admin.create({
+      data: {
+        username: adminUsername,
+        passwordHash,
+      },
+    });
+    console.log(`Seeded admin user with username: ${adminUsername}`);
   });
 
   console.log(`Seeding finished.`);

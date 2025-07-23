@@ -3,6 +3,10 @@ import MainLayout from './components/MainLayout.tsx';
 import { ProductGrid } from './components/ProductGrid';
 import { Product } from '../shared/types';
 import { ProductDetail } from './components/ProductDetail';
+import LoginPage from './components/admin/LoginPage';
+import CategoryManagementPage from './components/admin/CategoryManagementPage.tsx';
+import AdminDashboardPage from './components/admin/AdminDashboardPage';
+import ProductManagementPage from './components/admin/ProductManagementPage';
 
 type OutletContextType = {
   products: Product[];
@@ -19,7 +23,7 @@ const HomePage = () => {
         <div className="text-lg text-slate-500">Đang tải sản phẩm...</div>
       </div>
     );
-  }
+      }
   
   return <ProductGrid products={products} onAddToCart={addToCart} />;
 };
@@ -31,6 +35,10 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="products/:id" element={<ProductDetail />} />
       </Route>
+      <Route path="/admin/login" element={<LoginPage />} />
+      <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+      <Route path="/admin/products" element={<ProductManagementPage />} />
+      <Route path="/admin/categories" element={<CategoryManagementPage />} />
     </Routes>
   );
 }
