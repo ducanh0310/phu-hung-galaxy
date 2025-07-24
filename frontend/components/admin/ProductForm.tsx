@@ -1,5 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { Product, Category } from '../../../shared/types';
+import ImageUploader from './ImageUploader';
 import { Button } from '../ui/button';
 import {
   Dialog,
@@ -12,7 +13,7 @@ import {
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
-import { Textarea } from '../ui/textarea.tsx';
+import { Textarea } from '../ui/textarea';
 
 interface ProductFormProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export default function ProductForm({ isOpen, productToEdit, onClose, onSave, fe
   const [categories, setCategories] = useState<Category[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -76,6 +78,11 @@ export default function ProductForm({ isOpen, productToEdit, onClose, onSave, fe
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleUploadSuccess = (url: string) => {
+    setFormData((prev) => ({ ...prev, imageUrl: url }));
+    setError(null); // Clear previous errors when a new image is successfully uploaded
+  };
+
   const handleSubmit = async (e?: FormEvent) => {
     e?.preventDefault();
     setIsSaving(true);
@@ -88,6 +95,13 @@ export default function ProductForm({ isOpen, productToEdit, onClose, onSave, fe
 
     if (isNaN(productData.price) || productData.price <= 0) {
       setError('Price must be a positive number.');
+      setIsSaving(false);
+      return;
+    }
+
+    // Validate that an image has been uploaded/exists
+    if (!productData.imageUrl) {
+      setError('Product image is required.');
       setIsSaving(false);
       return;
     }
@@ -181,10 +195,15 @@ export default function ProductForm({ isOpen, productToEdit, onClose, onSave, fe
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="imageUrl" className="text-right">
-                Image URL
+              <Label htmlFor="imageUploader" className="text-right pt-2 self-start">
+                Image
               </Label>
-              <Input id="imageUrl" name="imageUrl" type="url" value={formData.imageUrl} onChange={handleChange} required className="col-span-3" />
+              <ImageUploader
+                initialImageUrl={formData.imageUrl}
+                onUploadSuccess={handleUploadSuccess}
+                onUploadStateChange={setIsUploadingImage}
+                className="col-span-3"
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="description" className="text-right">
@@ -195,8 +214,10 @@ export default function ProductForm({ isOpen, productToEdit, onClose, onSave, fe
             {error && <p className="text-sm text-red-600">{error}</p>}
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>Cancel</Button>
-            <Button type="submit" disabled={isSaving}>{isSaving ? 'Saving...' : 'Save Product'}</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSaving || isUploadingImage}>Cancel</Button>
+            <Button type="submit" disabled={isSaving || isUploadingImage}>
+              {isSaving ? 'Saving...' : isUploadingImage ? 'Uploading...' : 'Save Product'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

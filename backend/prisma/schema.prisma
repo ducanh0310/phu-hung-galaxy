@@ -26,7 +26,7 @@ model Subcategory {
 }
 
 model Product {
-  id            String      @id
+  id            String      @id @default(cuid())
   name          String
   price         Float
   imageUrl      String
