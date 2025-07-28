@@ -1,12 +1,11 @@
-import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+
+import express, { Express, Request, Response } from 'express';
 import { errorHandler, notFoundHandler } from './middlewares.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import apiRouter from './api/routes/index.js';
-
-// For env File
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
