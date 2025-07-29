@@ -43,16 +43,16 @@ export const ProductDetail: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <p className="text-xl text-slate-500">Đang tải chi tiết sản phẩm...</p>
+        <p className="text-xl text-muted-foreground">Đang tải chi tiết sản phẩm...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-20 text-red-500">
+      <div className="text-center py-20 text-destructive">
         <p className="text-xl">{error}</p>
-        <Link to="/" className="mt-4 inline-block bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700">
+        <Link to="/" className="mt-4 inline-block bg-primary text-primary-foreground py-2 px-4 rounded-lg hover:bg-primary/90">
           Về trang chủ
         </Link>
       </div>
@@ -62,7 +62,7 @@ export const ProductDetail: React.FC = () => {
   if (!product) {
     return (
       <div className="text-center py-20">
-        <p className="text-xl text-slate-500">Không tìm thấy sản phẩm.</p>
+        <p className="text-xl text-muted-foreground">Không tìm thấy sản phẩm.</p>
       </div>
     );
   }
@@ -80,7 +80,7 @@ export const ProductDetail: React.FC = () => {
   breadcrumbItems.push({ label: product.name });
 
   return (
-    <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg max-w-5xl mx-auto">
+    <div className="bg-card p-6 md:p-8 rounded-2xl shadow-lg max-w-5xl mx-auto">
       <div className="grid md:grid-cols-2 gap-8 md:gap-12">
         <div className="rounded-xl overflow-hidden shadow-md">
           <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover aspect-square" />
@@ -88,14 +88,14 @@ export const ProductDetail: React.FC = () => {
 
         <div className="flex flex-col">
           <Breadcrumbs items={breadcrumbItems} />
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">{product.name}</h1>
-          <p className="text-3xl font-bold text-green-600 mb-6">{formatPrice(product.price)}</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-card-foreground mb-4">{product.name}</h1>
+          <p className="text-3xl font-bold text-primary mb-6">{formatPrice(product.price)}</p>
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-slate-700 mb-2">Mô tả sản phẩm</h2>
-            <p className="text-slate-600 leading-relaxed">{product.description}</p>
+            <h2 className="text-lg font-semibold text-card-foreground mb-2">Mô tả sản phẩm</h2>
+            <p className="text-muted-foreground leading-relaxed">{product.description}</p>
           </div>
           <div className="mt-auto">
-            <button onClick={() => addToCart(product)} className="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-300 flex items-center justify-center gap-3">
+            <button onClick={() => addToCart(product)} className="w-full bg-primary text-primary-foreground py-4 rounded-xl font-bold text-lg hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-primary/30 flex items-center justify-center gap-3">
               <Icon name="fa-solid fa-shopping-cart" />
               <span>Thêm vào giỏ hàng</span>
             </button>

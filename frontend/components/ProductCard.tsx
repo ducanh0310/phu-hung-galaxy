@@ -34,15 +34,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
       <div className="p-5 flex flex-col flex-grow">
-        <h3 className="text-lg font-semibold text-slate-800 truncate mb-1" title={product.name}>
+        <h3 className="text-lg font-semibold text-card-foreground truncate mb-1" title={product.name}>
           {product.name}
         </h3>
-        <p className="text-sm text-slate-500 flex-grow mb-4">{product.description}</p>
+        <p className="text-sm text-muted-foreground flex-grow mb-4">{product.description}</p>
         <div className="flex justify-between items-center mt-auto">
-          <p className="text-xl font-bold text-green-600">{formatPrice(product.price)}</p>
+          <p className="text-xl font-bold text-primary">{formatPrice(product.price)}</p>
           <button
             onClick={handleAddToCartClick}
-            className="bg-green-500 text-white rounded-full h-11 w-11 flex items-center justify-center group-hover:bg-green-600 transition-colors duration-300 transform group-hover:scale-110 z-10"
+            className="bg-primary/90 text-primary-foreground rounded-full h-11 w-11 flex items-center justify-center group-hover:bg-primary transition-colors duration-300 transform group-hover:scale-110 z-10"
             aria-label={`Thêm ${product.name} vào giỏ hàng`}
           >
             <Icon name="fa-solid fa-plus" />

@@ -204,7 +204,7 @@ export default function ProductForm({ isOpen, productToEdit, onClose, onSave }: 
               </Label>
               <Textarea id="description" name="description" value={formData.description} onChange={handleChange} required className="col-span-3" />
             </div>
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="col-span-4 text-sm text-destructive">{error}</p>}
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={isSaving || isUploadingImage}>Cancel</Button>

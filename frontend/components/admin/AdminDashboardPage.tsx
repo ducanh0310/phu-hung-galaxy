@@ -46,7 +46,7 @@ export default function AdminDashboardPage() {
         <h1 className="text-lg font-semibold md:text-2xl">Dashboard</h1>
       </div>
       {isLoading && <p>Loading dashboard...</p>}
-      {error && <p className="text-red-500">Error: {error}</p>}
+      {error && <p className="text-destructive">Error: {error}</p>}
       {stats && (
         <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
           <StatCard title="Total Products" value={stats.products} icon={Package} />

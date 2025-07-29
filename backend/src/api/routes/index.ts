@@ -13,7 +13,7 @@ router.use(categoryRoutes);
 router.use(productRoutes);
 router.use(authRoutes);
 router.use('/admin/products', adminProductRoutes);
-router.use('/admin', adminCategoryRoutes);
+router.use('/admin/categories', adminCategoryRoutes);
 router.use('/admin/dashboard', adminDashboardRoutes);
 router.use('/admin/upload', adminUploadRoutes);
 

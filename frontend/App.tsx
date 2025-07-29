@@ -17,7 +17,7 @@ const HomePage = () => {
   if (isLoadingProducts) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-lg text-slate-500">Đang tải sản phẩm...</div>
+        <div className="text-lg text-muted-foreground">Đang tải sản phẩm...</div>
       </div>
     );
   }

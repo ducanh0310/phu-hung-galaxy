@@ -104,7 +104,7 @@ export default function ProductManagementPage() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => handleEdit(product)}>Edit</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDelete(product.id)} className="text-red-600">
+              <DropdownMenuItem onClick={() => handleDelete(product.id)} className="text-destructive focus:text-destructive-foreground focus:bg-destructive">
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -150,7 +150,7 @@ export default function ProductManagementPage() {
         </div>
       </div>
       {isLoading && <p>Loading products...</p>}
-      {error && <p className="text-red-500">Error: {error}</p>}
+      {error && <p className="text-destructive">Error: {error}</p>}
       {!isLoading && !error && (
         <DataTable
           columns={columns}

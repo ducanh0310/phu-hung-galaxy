@@ -10,7 +10,7 @@ export const ProductGrid: React.FC = () => {
     return (
       <AnimatedElement>
         <div className="text-center py-20">
-          <p className="text-xl text-slate-500">Không tìm thấy sản phẩm nào.</p>
+          <p className="text-xl text-muted-foreground">Không tìm thấy sản phẩm nào.</p>
         </div>
       </AnimatedElement>
     );

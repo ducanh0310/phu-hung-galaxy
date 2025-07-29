@@ -94,10 +94,10 @@ export default function ImageUploader({
       <div
         onClick={triggerFileSelect}
         className={cn(
-          'relative w-full aspect-video rounded-lg border-2 border-dashed border-slate-300 flex flex-col justify-center items-center text-slate-500 cursor-pointer hover:border-green-500 hover:text-green-600 transition-colors',
+          'relative w-full aspect-video rounded-lg border-2 border-dashed border-input flex flex-col justify-center items-center text-muted-foreground cursor-pointer hover:border-primary hover:text-primary transition-colors',
           {
-            'border-green-500': status === 'loading',
-            'border-red-500': status === 'error',
+            'border-primary': status === 'loading',
+            'border-destructive': status === 'error',
           },
         )}
       >
@@ -124,19 +124,19 @@ export default function ImageUploader({
         )}
 
         {status === 'loading' && (
-          <div className="absolute inset-0 bg-white/80 flex justify-center items-center rounded-md">
-            <Loader2 className="h-10 w-10 animate-spin text-green-600" />
+          <div className="absolute inset-0 bg-background/80 flex justify-center items-center rounded-md">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
           </div>
         )}
       </div>
       {status === 'success' && (
-        <div className="mt-2 flex items-center text-sm text-green-600">
+        <div className="mt-2 flex items-center text-sm text-primary">
           <CheckCircle className="h-4 w-4 mr-2" />
           Upload successful!
         </div>
       )}
       {status === 'error' && error && (
-        <div className="mt-2 flex items-center text-sm text-red-600">
+        <div className="mt-2 flex items-center text-sm text-destructive">
           <AlertTriangle className="h-4 w-4 mr-2" />
           {error}
         </div>
