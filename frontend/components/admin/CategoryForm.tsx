@@ -1,5 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { Category, Subcategory } from '../../../shared/types';
+import { api } from '../../lib/api';
 
 interface CategoryFormProps {
   modalState: {
@@ -10,11 +11,10 @@ interface CategoryFormProps {
   };
   onClose: () => void;
   onSave: () => void;
-  fetchWithAuth: (url: string, options?: RequestInit) => Promise<Response>;
   categories: Category[];
 }
 
-export default function CategoryForm({ modalState, onClose, onSave, fetchWithAuth, categories }: CategoryFormProps) {
+export default function CategoryForm({ modalState, onClose, onSave, categories }: CategoryFormProps) {
   const { mode, type, data, parentCategoryId } = modalState;
   const isCategory = type === 'category';
 
@@ -54,18 +54,18 @@ export default function CategoryForm({ modalState, onClose, onSave, fetchWithAut
       if (isCategory) {
         const payload = { name: formData.name, icon: formData.icon };
         if (mode === 'add') {
-          await fetchWithAuth('/api/v1/admin/categories', { method: 'POST', body: JSON.stringify(payload) });
+          await api.post('/admin/categories', payload);
         } else {
-          await fetchWithAuth(`/api/v1/admin/categories/${data!.id}`, { method: 'PUT', body: JSON.stringify(payload) });
+          await api.put(`/admin/categories/${data!.id}`, payload);
         }
       } else {
         // Subcategory
         const payload = { name: formData.name, categoryId: formData.categoryId };
         if (mode === 'add') {
-          await fetchWithAuth('/api/v1/admin/subcategories', { method: 'POST', body: JSON.stringify(payload) });
+          await api.post('/admin/subcategories', payload);
         } else {
           // Only name is updatable for simplicity
-          await fetchWithAuth(`/api/v1/admin/subcategories/${data!.id}`, { method: 'PUT', body: JSON.stringify({ name: payload.name }) });
+          await api.put(`/admin/subcategories/${data!.id}`, { name: payload.name });
         }
       }
       onSave();

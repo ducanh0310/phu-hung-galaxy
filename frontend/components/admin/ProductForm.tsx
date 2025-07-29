@@ -1,5 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { Product, Category } from '../../../shared/types';
+import { api } from '../../lib/api';
 import ImageUploader from './ImageUploader';
 import { Button } from '../ui/button';
 import {
@@ -20,10 +21,9 @@ interface ProductFormProps {
   productToEdit: Product | null;
   onClose: () => void;
   onSave: () => void;
-  fetchWithAuth: (url: string, options?: RequestInit) => Promise<Response>;
 }
 
-export default function ProductForm({ isOpen, productToEdit, onClose, onSave, fetchWithAuth }: ProductFormProps) {
+export default function ProductForm({ isOpen, productToEdit, onClose, onSave }: ProductFormProps) {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -39,8 +39,7 @@ export default function ProductForm({ isOpen, productToEdit, onClose, onSave, fe
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/v1/categories');
-        const data = await response.json();
+        const data = await api.get<Category[]>('/categories');
         setCategories(data);
         if (!productToEdit && data.length > 0 && data[0].subcategories.length > 0) {
           setFormData((prev) => ({ ...prev, subcategoryId: data[0].subcategories[0].id }));
@@ -109,16 +108,10 @@ export default function ProductForm({ isOpen, productToEdit, onClose, onSave, fe
     try {
       if (productToEdit) {
         // Update existing product
-        await fetchWithAuth(`/api/v1/admin/products/${productToEdit.id}`, {
-          method: 'PUT',
-          body: JSON.stringify(productData),
-        });
+        await api.put(`/admin/products/${productToEdit.id}`, productData);
       } else {
         // Create new product
-        await fetchWithAuth('/api/v1/admin/products', {
-          method: 'POST',
-          body: JSON.stringify(productData),
-        });
+        await api.post('/admin/products', productData);
       }
       onSave();
     } catch (err) {

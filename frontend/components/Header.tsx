@@ -1,14 +1,15 @@
 import React from 'react';
 import { Icon } from './Icon';
+import { useCartStore } from '../stores/useCartStore';
+import { useAppStore } from '../stores/useAppStore';
 
-interface HeaderProps {
-  onCartClick: () => void;
-  cartItemCount: number;
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
-}
+export const Header: React.FC = () => {
+  const toggleCart = useCartStore((state) => state.toggleCart);
+  const cartItemCount = useCartStore((state) => state.items.reduce((total, item) => total + item.quantity, 0));
 
-export const Header: React.FC<HeaderProps> = ({ onCartClick, cartItemCount, searchTerm, onSearchChange }) => {
+  const searchTerm = useAppStore((state) => state.searchTerm);
+  const setSearchTerm = useAppStore((state) => state.setSearchTerm);
+
   return (
     <header className="bg-white/80 backdrop-blur-lg h-20 flex-shrink-0 flex items-center justify-between px-8 border-b border-slate-200">
       <div className="relative w-full max-w-md">
@@ -18,11 +19,11 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick, cartItemCount, sear
           placeholder="Tìm kiếm sản phẩm..."
           className="w-full bg-slate-100 h-12 pl-12 pr-4 rounded-full border border-transparent focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow"
           value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
       <div className="flex items-center gap-6">
-        <button onClick={onCartClick} className="relative text-slate-600 hover:text-green-600 transition-colors">
+        <button onClick={() => toggleCart(true)} className="relative text-slate-600 hover:text-green-600 transition-colors">
           <Icon name="fa-solid fa-shopping-cart" className="text-2xl" />
           {cartItemCount > 0 && (
             <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">

@@ -13,31 +13,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu.tsx';
-
-// Helper to get JWT token
-const getToken = () => localStorage.getItem('jwt');
-
-// Helper for authenticated API calls
-const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-  const token = getToken();
-  const headers = {
-    ...options.headers,
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-  const response = await fetch(url, { ...options, headers });
-  if (response.status === 401) {
-    // Handle unauthorized access, e.g., redirect to login
-    localStorage.removeItem('jwt');
-    window.location.href = '/admin/login';
-    throw new Error('Unauthorized');
-  }
-  if (!response.ok && response.status !== 204) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'An API error occurred');
-  }
-  return response;
-};
+import { api } from '../../lib/api.ts';
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -53,7 +29,7 @@ export default function ProductManagementPage() {
   const handleDelete = async (productId: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await fetchWithAuth(`/api/v1/admin/products/${productId}`, { method: 'DELETE' });
+        await api.delete(`/admin/products/${productId}`);
         fetchProducts();
       } catch (err) {
         if (err instanceof Error) alert(`Failed to delete: ${err.message}`);
@@ -142,8 +118,7 @@ export default function ProductManagementPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetchWithAuth('/api/v1/admin/products');
-      const data = await response.json();
+      const data = await api.get<Product[]>('/admin/products');
       setProducts(data);
     } catch (err) {
       if (err instanceof Error) setError(err.message);
@@ -189,7 +164,6 @@ export default function ProductManagementPage() {
         productToEdit={editingProduct}
         onClose={() => setFormOpen(false)}
         onSave={handleSave}
-        fetchWithAuth={fetchWithAuth}
       />
     </>
   );

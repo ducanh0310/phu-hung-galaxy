@@ -1,22 +1,14 @@
 import React, { useMemo } from 'react';
 import { CartItem } from '../../shared/types';
 import { Icon } from './Icon';
-
-interface CartProps {
-  isOpen: boolean;
-  onClose: () => void;
-  items: CartItem[];
-  onUpdateQuantity: (productId: string, quantity: number) => void;
-}
+import { useCartStore } from '../stores/useCartStore';
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 };
 
-const CartLineItem: React.FC<{ item: CartItem; onUpdateQuantity: (id: string, q: number) => void }> = ({
-  item,
-  onUpdateQuantity,
-}) => {
+const CartLineItem: React.FC<{ item: CartItem }> = ({ item }) => {
+  const updateQuantity = useCartStore((state) => state.updateQuantity);
   return (
     <div className="flex items-center gap-4 py-4">
       <img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-lg object-cover" />
@@ -26,14 +18,14 @@ const CartLineItem: React.FC<{ item: CartItem; onUpdateQuantity: (id: string, q:
       </div>
       <div className="flex items-center gap-2 border border-slate-200 rounded-full p-1">
         <button
-          onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+          onClick={() => updateQuantity(item.id, item.quantity - 1)}
           className="w-6 h-6 rounded-full hover:bg-slate-100 text-slate-500"
         >
           -
         </button>
         <span className="w-6 text-center font-medium text-sm">{item.quantity}</span>
         <button
-          onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+          onClick={() => updateQuantity(item.id, item.quantity + 1)}
           className="w-6 h-6 rounded-full hover:bg-slate-100 text-slate-500"
         >
           +
@@ -44,7 +36,10 @@ const CartLineItem: React.FC<{ item: CartItem; onUpdateQuantity: (id: string, q:
   );
 };
 
-export const Cart: React.FC<CartProps> = ({ isOpen, onClose, items, onUpdateQuantity }) => {
+export const Cart: React.FC = () => {
+  const isOpen = useCartStore((state) => state.isOpen);
+  const items = useCartStore((state) => state.items);
+  const toggleCart = useCartStore((state) => state.toggleCart);
   const totalPrice = useMemo(() => {
     return items.reduce((total, item) => total + item.price * item.quantity, 0);
   }, [items]);
@@ -55,7 +50,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose, items, onUpdateQuan
         className={`fixed inset-0 bg-black/30 z-40 transition-opacity ${
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
-        onClick={onClose}
+        onClick={() => toggleCart(false)}
       ></div>
       <div
         className={`fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 transform transition-transform duration-300 ease-in-out ${
@@ -65,7 +60,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose, items, onUpdateQuan
         <div className="flex flex-col h-full">
           <header className="flex items-center justify-between p-6 border-b border-slate-200">
             <h2 className="text-xl font-bold">Giỏ Hàng Của Bạn</h2>
-            <button onClick={onClose} className="text-slate-500 hover:text-slate-800 transition-colors">
+            <button onClick={() => toggleCart(false)} className="text-slate-500 hover:text-slate-800 transition-colors">
               <Icon name="fa-solid fa-times" className="text-2xl" />
             </button>
           </header>
@@ -79,7 +74,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose, items, onUpdateQuan
             ) : (
               <div className="divide-y divide-slate-100">
                 {items.map((item) => (
-                  <CartLineItem key={item.id} item={item} onUpdateQuantity={onUpdateQuantity} />
+                  <CartLineItem key={item.id} item={item} />
                 ))}
               </div>
             )}

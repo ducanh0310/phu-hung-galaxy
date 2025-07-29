@@ -2,9 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { UploadCloud, Loader2, CheckCircle, AlertTriangle, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { cn } from '../../lib/utils';
-
-// Helper to get JWT token
-const getToken = () => localStorage.getItem('jwt');
+import { api } from '../../lib/api';
 
 interface ImageUploaderProps {
   initialImageUrl?: string | null;
@@ -51,22 +49,7 @@ export default function ImageUploader({
     formData.append('file', file);
 
     try {
-      const token = getToken();
-      if (!token) throw new Error('Authentication token not found.');
-
-      const response = await fetch('/api/v1/admin/upload', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Upload failed');
-      }
+      const data = await api.postFormData<{ url: string }>('/admin/upload', formData);
 
       setStatus('success');
       setPreviewUrl(data.url);

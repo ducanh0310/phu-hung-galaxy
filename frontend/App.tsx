@@ -1,5 +1,5 @@
-import { Routes, Route, useOutletContext } from 'react-router-dom';
-import MainLayout from './components/MainLayout.tsx';
+import { Routes, Route } from 'react-router-dom';
+import MainLayout from './components/MainLayout';
 import { ProductGrid } from './components/ProductGrid';
 import { Product } from '../shared/types';
 import { ProductDetail } from './components/ProductDetail';
@@ -9,25 +9,20 @@ import AdminDashboardPage from './components/admin/AdminDashboardPage';
 import ProductManagementPage from './components/admin/ProductManagementPage';
 import AdminLayout from './components/admin/AdminLayout.tsx';
 import AdminProtectedRoute from './components/admin/AdminProtectedRoute.tsx';
-
-type OutletContextType = {
-  products: Product[];
-  addToCart: (product: Product) => void;
-  isLoadingProducts: boolean;
-};
+import { useAppStore } from './stores/useAppStore';
 
 const HomePage = () => {
-  const { products, addToCart, isLoadingProducts } = useOutletContext<OutletContextType>();
-  
+  const isLoadingProducts = useAppStore((state) => state.isLoadingProducts);
+
   if (isLoadingProducts) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="text-lg text-slate-500">Đang tải sản phẩm...</div>
       </div>
     );
-      }
-  
-  return <ProductGrid products={products} onAddToCart={addToCart} />;
+  }
+
+  return <ProductGrid />;
 };
 
 export default function App() {

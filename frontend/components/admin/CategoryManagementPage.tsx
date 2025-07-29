@@ -3,30 +3,7 @@ import { Category, Subcategory } from '../../../shared/types';
 import CategoryForm from './CategoryForm';
 import { Link } from 'react-router-dom';
 import { Icon } from '../Icon.tsx';
-
-// Helper to get JWT token
-const getToken = () => localStorage.getItem('jwt');
-
-// Helper for authenticated API calls
-const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-  const token = getToken();
-  const headers = {
-    ...options.headers,
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-  const response = await fetch(url, { ...options, headers });
-  if (response.status === 401) {
-    localStorage.removeItem('jwt');
-    window.location.href = '/admin/login';
-    throw new Error('Unauthorized');
-  }
-  if (!response.ok && response.status !== 204) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'An API error occurred');
-  }
-  return response;
-};
+import { api } from '../../lib/api.ts';
 
 type ModalState = {
   mode: 'add' | 'edit';
@@ -46,8 +23,7 @@ export default function CategoryManagementPage() {
     setError(null);
     try {
       // This is a public route, no auth needed for GET
-      const response = await fetch('/api/v1/categories');
-      const data = await response.json();
+      const data = await api.get<Category[]>('/categories');
       setCategories(data);
     } catch (err) {
       if (err instanceof Error) setError(err.message);
@@ -64,8 +40,8 @@ export default function CategoryManagementPage() {
     const confirmMessage = `Are you sure you want to delete this ${type}? This action cannot be undone.`;
     if (window.confirm(confirmMessage)) {
       try {
-        const url = type === 'category' ? `/api/v1/admin/categories/${id}` : `/api/v1/admin/subcategories/${id}`;
-        await fetchWithAuth(url, { method: 'DELETE' });
+        const url = type === 'category' ? `/admin/categories/${id}` : `/admin/subcategories/${id}`;
+        await api.delete(url);
         fetchCategories(); // Refresh list
       } catch (err) {
         if (err instanceof Error) alert(`Failed to delete: ${err.message}`);
@@ -137,7 +113,6 @@ export default function CategoryManagementPage() {
           modalState={modalState}
           onClose={() => setModalState(null)}
           onSave={handleSave}
-          fetchWithAuth={fetchWithAuth}
           categories={categories}
         />
       )}

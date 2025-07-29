@@ -2,13 +2,14 @@ import React from 'react';
 import { Product } from '../../shared/types';
 import { Icon } from './Icon';
 import { Link } from 'react-router-dom';
+import { useCartStore } from '../stores/useCartStore';
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: (product: Product) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const addToCart = useCartStore((state) => state.addToCart);
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
@@ -16,7 +17,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
   const handleAddToCartClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    onAddToCart(product);
+    addToCart(product);
   };
 
   return (

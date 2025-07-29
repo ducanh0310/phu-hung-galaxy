@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { api } from '../../lib/api';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -18,20 +19,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/v1/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
+      const data = await api.post<{ token: string }>('/auth/login', { username, password });
       localStorage.setItem('jwt', data.token);
       // Redirect to admin dashboard on successful login
       navigate('/admin/dashboard');

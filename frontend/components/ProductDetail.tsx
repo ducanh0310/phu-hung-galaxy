@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useOutletContext, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Product } from '../../shared/types';
 import { Icon } from './Icon';
 import { Breadcrumbs } from './Breadcrumbs';
-
-// Define the type for the context from MainLayout
-type OutletContextType = {
-  addToCart: (product: Product) => void;
-};
+import { useCartStore } from '../stores/useCartStore';
+import { api } from '../lib/api';
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -15,7 +12,7 @@ const formatPrice = (price: number) => {
 
 export const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { addToCart } = useOutletContext<OutletContextType>();
+  const addToCart = useCartStore((state) => state.addToCart);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,18 +22,11 @@ export const ProductDetail: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/v1/products/${id}`);
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('Sản phẩm không tồn tại.');
-          }
-          throw new Error('Không thể tải dữ liệu sản phẩm.');
-        }
-        const data: Product = await response.json();
+        const data = await api.get<Product>(`/products/${id}`);
         setProduct(data);
       } catch (err) {
         if (err instanceof Error) {
-          setError(err.message);
+          setError(err.message.includes('not found') ? 'Sản phẩm không tồn tại.' : 'Không thể tải dữ liệu sản phẩm.');
         } else {
           setError('Đã xảy ra lỗi không mong muốn.');
         }

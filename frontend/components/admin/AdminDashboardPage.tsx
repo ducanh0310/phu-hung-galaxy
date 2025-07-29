@@ -1,35 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { FolderKanban, Layers3, Package } from 'lucide-react';
-
-// Helper to get JWT token
-const getToken = () => localStorage.getItem('jwt');
-
-// Helper for authenticated API calls
-const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-  const token = getToken();
-  if (!token) {
-    window.location.href = '/admin/login';
-    throw new Error('No token found');
-  }
-  const headers = {
-    ...options.headers,
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-  const response = await fetch(url, { ...options, headers });
-  if (response.status === 401) {
-    // Handle unauthorized access, e.g., redirect to login
-    localStorage.removeItem('jwt'); // Also clear the invalid token
-    window.location.href = '/admin/login';
-    throw new Error('Unauthorized');
-  }
-  if (!response.ok && response.status !== 204) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'An API error occurred');
-  }
-  return response;
-};
+import { api } from '../../lib/api';
 
 interface Stats {
   products: number;
@@ -57,8 +29,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const getStats = async () => {
       try {
-        const response = await fetchWithAuth('/api/v1/admin/dashboard/stats');
-        const data = await response.json();
+        const data = await api.get<Stats>('/admin/dashboard/stats');
         setStats(data);
       } catch (err) {
         if (err instanceof Error) setError(err.message);

@@ -1,31 +1,58 @@
-import React, { useState } from 'react';
-import { Category, Subcategory } from '../../shared/types';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Icon } from './Icon';
+import { useAppStore } from '../stores/useAppStore';
+import { Subcategory } from '../../shared/types';
 
-interface SidebarProps {
-  categories: Category[];
-  selectedSubcategory: Subcategory | null;
-  onSelectSubcategory: (subcategory: Subcategory | null) => void;
-}
+export const Sidebar: React.FC = () => {
+  const { categories, selectedSubcategoryId, selectSubcategory, getSelectedSubcategory } = useAppStore();
+  const selectedSubcategory = getSelectedSubcategory();
 
-export const Sidebar: React.FC<SidebarProps> = ({ categories, selectedSubcategory, onSelectSubcategory }) => {
-  const [openCategory, setOpenCategory] = useState<string | null>(categories[0]?.id || null);
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!openCategory && selectedSubcategory) {
+      setOpenCategory(selectedSubcategory.categoryId);
+    }
+  }, [selectedSubcategory, openCategory]);
 
   const toggleCategory = (categoryId: string) => {
     setOpenCategory((prev) => (prev === categoryId ? null : categoryId));
   };
 
+  const handleSelectSubcategory = useCallback(
+    (subcategory: Subcategory | null) => {
+      const newSearchParams = new URLSearchParams(searchParams);
+      if (subcategory) {
+        newSearchParams.set('subcategory', subcategory.id);
+        selectSubcategory(subcategory.id);
+      } else {
+        newSearchParams.delete('subcategory');
+        selectSubcategory(null);
+      }
+
+      if (location.pathname !== '/') {
+        navigate({ pathname: '/', search: newSearchParams.toString() });
+      } else {
+        setSearchParams(newSearchParams);
+      }
+    },
+    [searchParams, setSearchParams, navigate, location.pathname, selectSubcategory],
+  );
+
   return (
     <aside className="w-80 bg-white border-r border-slate-200 p-6 overflow-y-auto">
       <h1 className="text-2xl font-bold mb-8 text-slate-800">Gourmet Grove</h1>
-
       <nav className="flex-1">
         <ul>
           <li
             className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors duration-200 mb-4 ${
-              !selectedSubcategory ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-slate-100'
+              !selectedSubcategoryId ? 'bg-green-100 text-green-700 font-semibold' : 'hover:bg-slate-100'
             }`}
-            onClick={() => onSelectSubcategory(null)}
+            onClick={() => handleSelectSubcategory(null)}
           >
             <Icon name="fa-solid fa-store" className="w-5 text-center" />
             <span>Tất Cả Sản Phẩm</span>
@@ -54,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ categories, selectedSubcategor
                 {category.subcategories.map((sub) => (
                   <li
                     key={sub.id}
-                    onClick={() => onSelectSubcategory(sub)}
+                    onClick={() => handleSelectSubcategory(sub)}
                     className={`pl-11 pr-3 py-2.5 text-slate-600 cursor-pointer rounded-lg mt-1 transition-colors duration-200 relative
                       ${
                         selectedSubcategory?.id === sub.id
