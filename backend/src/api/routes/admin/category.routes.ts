@@ -19,7 +19,7 @@ router.use(protect);
 // --- Category Routes ---
 
 // POST a new category
-router.post('/categories', validate(createCategorySchema), async (req: Request, res: Response, next: NextFunction) => {
+router.post('/', validate(createCategorySchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const newCategory = await categoryService.createCategory(req.body);
     res.status(201).json(newCategory);
@@ -29,7 +29,7 @@ router.post('/categories', validate(createCategorySchema), async (req: Request, 
 });
 
 // PUT to update a category
-router.put('/categories/:id', validate(updateCategorySchema), async (req: Request, res: Response, next: NextFunction) => {
+router.put('/:id', validate(updateCategorySchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const updatedCategory = await categoryService.updateCategory(id, req.body);
@@ -40,7 +40,7 @@ router.put('/categories/:id', validate(updateCategorySchema), async (req: Reques
 });
 
 // DELETE a category
-router.delete('/categories/:id', validate(deleteCategorySchema), async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/:id', validate(deleteCategorySchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     await categoryService.deleteCategory(id);
