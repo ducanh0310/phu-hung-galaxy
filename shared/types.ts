@@ -28,6 +28,22 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
+export interface OrderItem {
+  id: string;
+  product: Product;
+  quantity: number;
+  price: number; // Price at time of purchase
+}
+
+export interface Order {
+  id: string;
+  createdAt: string; // ISO date string
+  total: number;
+  status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  items: OrderItem[];
+  shippingAddress?: string | null;
+}
+
 export interface User {
   id: string;
   email: string;

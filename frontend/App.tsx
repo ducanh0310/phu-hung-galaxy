@@ -10,9 +10,13 @@ import ProductManagementPage from './components/admin/ProductManagementPage';
 import AdminLayout from './components/admin/AdminLayout.tsx';
 import AdminProtectedRoute from './components/admin/AdminProtectedRoute.tsx';
 import { useAppStore } from './stores/useAppStore.ts';
-import { useAuthStore } from './stores/useAuthStore.ts';
 import UserLoginPage from './components/UserLoginPage.tsx';
 import RegisterPage from './components/RegisterPage.tsx';
+import UserProtectedRoute from './components/UserProtectedRoute.tsx';
+import CheckoutPage from './components/CheckoutPage.tsx';
+import OrderHistoryPage from './components/OrderHistoryPage.tsx';
+import OrderDetailPage from './components/OrderDetailPage.tsx';
+import { useAuthStore } from './stores/useAuthStore.ts';
 
 const HomePage = () => {
   const isLoadingProducts = useAppStore((state) => state.isLoadingProducts);
@@ -39,10 +43,17 @@ export default function App() {
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route path="products/:id" element={<ProductDetail />} />
+        <Route element={<UserProtectedRoute />}>
+          <Route path="checkout" element={<CheckoutPage />} />
+          <Route path="orders" element={<OrderHistoryPage />} />
+          <Route path="orders/:id" element={<OrderDetailPage />} />
+        </Route>
       </Route>
 
       <Route path="/login" element={<UserLoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+
+
 
       <Route path="/admin/login" element={<LoginPage />} />
       <Route element={<AdminProtectedRoute />}>

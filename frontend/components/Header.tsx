@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
-import { User as UserIcon, LogOut } from 'lucide-react';
+import { User as UserIcon, LogOut, Package } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const toggleCart = useCartStore((state) => state.toggleCart);
@@ -58,6 +58,10 @@ export const Header: React.FC = () => {
               <DropdownMenuItem className="font-semibold">{user.name}</DropdownMenuItem>
               <DropdownMenuItem disabled>{user.email}</DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/orders')}>
+                <Package className="mr-2 h-4 w-4" />
+                <span>Lịch sử đơn hàng</span>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => logout()}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Đăng xuất</span>

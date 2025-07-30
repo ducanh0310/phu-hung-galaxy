@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { User } from '../../shared/types';
+import { useCartStore } from './useCartStore';
 
 // atob is deprecated in Node.js but fine in browsers.
 const decodeToken = (token: string): User | null => {
@@ -41,12 +42,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (user) {
       localStorage.setItem('user_token', token);
       set({ token, user, isAuthenticated: true });
+      // Sync local cart with server and fetch the result
+      useCartStore.getState().syncCart();
     } else {
       get().logout();
     }
   },
   logout: () => {
     localStorage.removeItem('user_token');
+    // Reset cart to an empty local state
+    useCartStore.getState().resetCart();
     set({ token: null, user: null, isAuthenticated: false });
   },
   initialize: () => {
@@ -55,6 +60,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const user = decodeToken(token);
       if (user) {
         set({ token, user, isAuthenticated: true });
+        // Fetch cart for the already logged-in user
+        useCartStore.getState().fetchCart();
       } else {
         localStorage.removeItem('user_token');
       }

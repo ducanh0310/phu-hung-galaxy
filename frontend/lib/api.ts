@@ -1,13 +1,24 @@
 const API_BASE_URL = '/api/v1';
 
-const getToken = () => localStorage.getItem('jwt');
+const getToken = () => {
+  // Prioritize user token for user-facing parts of the app
+  const userToken = localStorage.getItem('user_token');
+  if (userToken) return userToken;
+  // Fallback to admin token for admin panel
+  return localStorage.getItem('jwt');
+};
 
 const handleResponse = async (response: Response) => {
   if (response.status === 401) {
-    localStorage.removeItem('jwt');
-    // Use replace to prevent user from navigating back to the unauthorized page
-    window.location.replace('/admin/login');
-    throw new Error('Unauthorized');
+    const onAdminPage = window.location.pathname.startsWith('/admin');
+    if (onAdminPage) {
+      localStorage.removeItem('jwt');
+      window.location.replace('/admin/login');
+    } else {
+      localStorage.removeItem('user_token');
+      window.location.replace('/login');
+    }
+    throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
   }
 
   if (!response.ok && response.status !== 204) {
@@ -21,10 +32,11 @@ const handleResponse = async (response: Response) => {
     return null;
   }
 
-  return response.json();
+  const data = await response.json();
+  return data;
 };
 
-const request = async (endpoint: string, options: RequestInit = {}) => {
+const request = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
   const token = getToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -44,16 +56,16 @@ const request = async (endpoint: string, options: RequestInit = {}) => {
 
 export const api = {
   get: <T>(endpoint: string, options?: RequestInit): Promise<T> => {
-    return request(endpoint, { ...options, method: 'GET' });
+    return request<T>(endpoint, { ...options, method: 'GET' });
   },
   post: <T>(endpoint: string, body: unknown, options?: RequestInit): Promise<T> => {
-    return request(endpoint, { ...options, method: 'POST', body: JSON.stringify(body) });
+    return request<T>(endpoint, { ...options, method: 'POST', body: JSON.stringify(body) });
   },
   put: <T>(endpoint: string, body: unknown, options?: RequestInit): Promise<T> => {
-    return request(endpoint, { ...options, method: 'PUT', body: JSON.stringify(body) });
+    return request<T>(endpoint, { ...options, method: 'PUT', body: JSON.stringify(body) });
   },
   delete: <T>(endpoint: string, options?: RequestInit): Promise<T> => {
-    return request(endpoint, { ...options, method: 'DELETE' });
+    return request<T>(endpoint, { ...options, method: 'DELETE' });
   },
   postFormData: async <T>(endpoint: string, formData: FormData, options?: RequestInit): Promise<T> => {
     const token = getToken();
