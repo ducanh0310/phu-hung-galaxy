@@ -51,7 +51,7 @@ class AuthService {
       throw new AppError('Internal server error: JWT secret is missing.', 500);
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     return token;
   }
