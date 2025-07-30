@@ -2,20 +2,20 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AppError } from './middlewares.js';
 
-interface AdminJwtPayload {
+interface UserJwtPayload {
   id: string;
-  username: string;
+  email: string;
 }
 
 declare global {
   namespace Express {
     export interface Request {
-      admin?: AdminJwtPayload;
+      user?: UserJwtPayload;
     }
   }
 }
 
-export const protect = (req: Request, res: Response, next: NextFunction) => {
+export const protectUser = (req: Request, res: Response, next: NextFunction) => {
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -31,12 +31,12 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
       console.error('JWT_SECRET is not defined.');
       throw new AppError('Internal server error: JWT secret is missing.', 500);
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET) as AdminJwtPayload;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as UserJwtPayload;
 
-    req.admin = decoded;
+    req.user = decoded;
 
     next();
   } catch (error) {
     return next(new AppError('Invalid token. Please log in again.', 401));
   }
-}; 
+};

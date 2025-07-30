@@ -40,3 +40,12 @@ model Admin {
   username     String @unique
   passwordHash String
 }
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

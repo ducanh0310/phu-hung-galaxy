@@ -19,7 +19,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const data = await api.post<{ token: string }>('/auth/login', { username, password });
+      const data = await api.post<{ token: string }>('/auth/admin/login', { username, password });
       localStorage.setItem('jwt', data.token);
       // Redirect to admin dashboard on successful login
       navigate('/admin/dashboard');

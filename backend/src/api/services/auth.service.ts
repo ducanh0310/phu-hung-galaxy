@@ -31,6 +31,30 @@ class AuthService {
 
     return token;
   }
+
+  async loginUser(email: string, password: string): Promise<string> {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new AppError('Invalid email or password', 401);
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new AppError('Invalid email or password', 401);
+    }
+
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not defined.');
+      throw new AppError('Internal server error: JWT secret is missing.', 500);
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    return token;
+  }
 }
 
-export const authService = new AuthService(); 
+export const authService = new AuthService();
